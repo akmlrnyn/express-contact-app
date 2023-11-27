@@ -4,11 +4,12 @@ const app = express();
 const expressLayout = require('express-ejs-layouts');
 
 const port = 3000;
-const { loadContact, findContact } = require('./utils/contacts');
+const { loadContact, findContact, addContact } = require('./utils/contacts');
 
 // gunakan ejs
 app.set('view engine', 'ejs');
 app.use(expressLayout);
+app.use(express.urlencoded());
 
 app.get('/', (req, res) => {
   // res.sendFile('./index.html', { root: __dirname });
@@ -48,6 +49,10 @@ app.get('/contact/add', (req, res) => {
 });
 
 // Proses data kontak
+app.post('/contact', (req, res) => {
+  addContact(req.body);
+  res.redirect('/contact');
+});
 
 app.get('/contact/:nama', (req, res) => {
   const contact = findContact(req.params.nama);
