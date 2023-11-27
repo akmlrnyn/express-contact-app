@@ -2,6 +2,7 @@ const express = require('express');
 
 const app = express();
 const expressLayout = require('express-ejs-layouts');
+const { body, validationResult } = require('express-validator');
 
 const port = 3000;
 const { loadContact, findContact, addContact } = require('./utils/contacts');
@@ -9,7 +10,7 @@ const { loadContact, findContact, addContact } = require('./utils/contacts');
 // gunakan ejs
 app.set('view engine', 'ejs');
 app.use(expressLayout);
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
   // res.sendFile('./index.html', { root: __dirname });
@@ -49,9 +50,18 @@ app.get('/contact/add', (req, res) => {
 });
 
 // Proses data kontak
-app.post('/contact', (req, res) => {
-  addContact(req.body);
-  res.redirect('/contact');
+app.post('/contact', [ 
+  body('email').isEmail(),
+  body('nohp').
+ 
+], (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    res.send({ errors: errors.array() });
+  }
+  // addContact(req.body);
+  // res.redirect('/contact');
 });
 
 app.get('/contact/:nama', (req, res) => {
