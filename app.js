@@ -5,7 +5,9 @@ const expressLayout = require('express-ejs-layouts');
 const { body, validationResult, check } = require('express-validator');
 
 const port = 3000;
-const { loadContact, findContact, addContact, cekDuplikat } = require('./utils/contacts');
+const {
+  loadContact, findContact, addContact, cekDuplikat,
+} = require('./utils/contacts');
 
 // gunakan ejs
 app.set('view engine', 'ejs');
@@ -65,7 +67,12 @@ app.post('/contact', [
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    res.send({ errors: errors.array() });
+    // res.send({ errors: errors.ar ray() });
+    res.render('add-contact', {
+      title: 'Add Contacts',
+      layout: 'layouts/main-layout',
+      errors: errors.array(),
+    });
   }
   // addContact(req.body);
   // res.redirect('/contact');
