@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const expressLayout = require('express-ejs-layouts');
 const { body, validationResult, check } = require('express-validator');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const flash = require('connect-flash');
 
 const port = 3000;
 const {
@@ -13,6 +16,16 @@ const {
 app.set('view engine', 'ejs');
 app.use(expressLayout);
 app.use(express.urlencoded({ extended: true }));
+
+// Konfigurasi flash
+app.use(cookieParser('secret'));
+app.use(session({
+  cookie: { maxAge: 6000 },
+  secret: 'secret',
+  resave: true,
+  saveUninitialized: true,
+}));
+app.use(flash());
 
 app.get('/', (req, res) => {
   // res.sendFile('./index.html', { root: __dirname });
@@ -39,7 +52,7 @@ app.get('/contact', (req, res) => {
   const contacts = loadContact();
   // res.sendFile('./contact.html', { root: __dirname });
   res.render('contact', {
-    contacts, layout: 'layouts/main-layout.ejs', nama: 'Akmal', header: 'ExpressJS - Contact Page',
+    contacts, layout: 'layouts/main-layout.ejs', nama: 'Akmal', header: 'ExpressJS - Contact Page', msg: req.flash('msg'),
   });
 });
 
@@ -74,8 +87,10 @@ app.post('/contact', [
       errors: errors.array(),
     });
   }
-  // addContact(req.body);
-  // res.redirect('/contact');
+  addContact(req.body);
+  // Kirimkan Flash Message
+  req.flash('msg', 'Data berhasil ditambahkan!');
+  res.redirect('/contact');
 });
 
 app.get('/contact/:nama', (req, res) => {

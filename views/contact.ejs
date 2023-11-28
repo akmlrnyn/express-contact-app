@@ -5,6 +5,12 @@
 
       <a href="/contact/add" class="btn btn-primary mb-2">Tambah data contact</a>
 
+      <% if (msg.length !== 0) { %>
+        <div class="alert alert-success" role="alert">
+          <%= msg %>
+        </div>
+      <% } %>
+
       <table class="table">
 
         <% if (contacts.length < 1) { %>
