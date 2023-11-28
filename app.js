@@ -2,10 +2,10 @@ const express = require('express');
 
 const app = express();
 const expressLayout = require('express-ejs-layouts');
-const { body, validationResult } = require('express-validator');
+const { body, validationResult, check } = require('express-validator');
 
 const port = 3000;
-const { loadContact, findContact, addContact } = require('./utils/contacts');
+const { loadContact, findContact, addContact, cekDuplikat } = require('./utils/contacts');
 
 // gunakan ejs
 app.set('view engine', 'ejs');
@@ -50,10 +50,17 @@ app.get('/contact/add', (req, res) => {
 });
 
 // Proses data kontak
-app.post('/contact', [ 
-  body('email').isEmail(),
-  body('nohp').
- 
+app.post('/contact', [
+  body('nama').custom((value) => {
+    const duplikat = cekDuplikat(value);
+    if (duplikat) {
+      throw new Error('Nama sudah ada');
+    }
+    return true;
+  }),
+  check('email', 'Email tidak valid!').isEmail(),
+  check('nohp', 'nohp tidak valid!').isMobilePhone('id-ID'),
+
 ], (req, res) => {
   const errors = validationResult(req);
 
