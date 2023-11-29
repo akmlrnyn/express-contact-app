@@ -18,6 +18,7 @@ const {
   addContact,
   cekDuplikat,
   deleteContact,
+  updateContacts,
 } = require('./utils/contacts');
 
 // gunakan ejs
@@ -122,6 +123,44 @@ app.get('/about', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Listening to port http://localhost:${port}`);
+});
+
+app.get('/contact/edit/:nama', (req, res) => {
+  const contact = req.params.nama;
+  res.render('edit-contact', {
+    title: 'Edit Contacts',
+    layout: 'layouts/main-layout',
+    contact,
+  });
+});
+
+app.post('/contact/update', [
+  body('nama').custom((value, { req }) => {
+    const duplikat = cekDuplikat(value);
+    if (value !== req.body.oldNama && duplikat) {
+      throw new Error('Nama sudah ada');
+    }
+    return true;
+  }),
+  check('email', 'Email tidak valid!').isEmail(),
+  check('nohp', 'nohp tidak valid!').isMobilePhone('id-ID'),
+
+], (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    // res.send({ errors: errors.ar ray() });
+    res.render('edit-contact', {
+      title: 'edit Contacts',
+      layout: 'layouts/main-layout',
+      errors: errors.array(),
+      contact: req.body,
+    });
+  }
+  updateContacts(req.body);
+  // Kirimkan Flash Message
+  req.flash('msg', 'Data berhasil ditambahkan!');
+  res.redirect('/contact');
 });
 
 app.get('/contact/delete/:nama', (req, res) => {
