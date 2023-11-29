@@ -2,25 +2,37 @@ const express = require('express');
 
 const app = express();
 const expressLayout = require('express-ejs-layouts');
-const { body, validationResult, check } = require('express-validator');
+const {
+  body,
+  validationResult,
+  check,
+} = require('express-validator');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 
 const port = 3000;
 const {
-  loadContact, findContact, addContact, cekDuplikat,
+  loadContact,
+  findContact,
+  addContact,
+  cekDuplikat,
+  deleteContact,
 } = require('./utils/contacts');
 
 // gunakan ejs
 app.set('view engine', 'ejs');
 app.use(expressLayout);
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+  extended: true,
+}));
 
 // Konfigurasi flash
 app.use(cookieParser('secret'));
 app.use(session({
-  cookie: { maxAge: 6000 },
+  cookie: {
+    maxAge: 6000,
+  },
   secret: 'secret',
   resave: true,
   saveUninitialized: true,
@@ -29,22 +41,24 @@ app.use(flash());
 
 app.get('/', (req, res) => {
   // res.sendFile('./index.html', { root: __dirname });
-  const students = [
-    {
-      name: 'Akmal Faiq',
-      email: 'akmalranyan@gmail.com',
-    },
-    {
-      name: 'Faiq Akmal',
-      email: 'faaiw@gmail.com',
-    },
-    {
-      name: 'Ranyan',
-      email: 'ranyan@gmail.com',
-    },
+  const students = [{
+    name: 'Akmal Faiq',
+    email: 'akmalranyan@gmail.com',
+  },
+  {
+    name: 'Faiq Akmal',
+    email: 'faaiw@gmail.com',
+  },
+  {
+    name: 'Ranyan',
+    email: 'ranyan@gmail.com',
+  },
   ];
   res.render('index', {
-    layout: 'layouts/main-layout.ejs', students, nama: 'Akmal', header: 'ExpressJS',
+    layout: 'layouts/main-layout.ejs',
+    students,
+    nama: 'Akmal',
+    header: 'ExpressJS',
   });
 });
 
@@ -52,7 +66,11 @@ app.get('/contact', (req, res) => {
   const contacts = loadContact();
   // res.sendFile('./contact.html', { root: __dirname });
   res.render('contact', {
-    contacts, layout: 'layouts/main-layout.ejs', nama: 'Akmal', header: 'ExpressJS - Contact Page', msg: req.flash('msg'),
+    contacts,
+    layout: 'layouts/main-layout.ejs',
+    nama: 'Akmal',
+    header: 'ExpressJS - Contact Page',
+    msg: req.flash('msg'),
   });
 });
 
@@ -93,19 +111,38 @@ app.post('/contact', [
   res.redirect('/contact');
 });
 
-app.get('/contact/:nama', (req, res) => {
-  const contact = findContact(req.params.nama);
-  res.render('detail', {
-    contact, layout: 'layouts/main-layout.ejs', nama: 'Akmal', header: 'ExpressJS - Contact Page',
-  });
-  return contact;
-});
-
 app.get('/about', (req, res) => {
   // res.sendFile('./about.html', { root: __dirname });
-  res.render('about', { layout: 'layouts/main-layout.ejs', nama: 'Akmal', header: 'ExpressJS - About Page' });
+  res.render('about', {
+    layout: 'layouts/main-layout.ejs',
+    nama: 'Akmal',
+    header: 'ExpressJS - About Page',
+  });
 });
 
 app.listen(port, () => {
   console.log(`Listening to port http://localhost:${port}`);
+});
+
+app.get('/contact/delete/:nama', (req, res) => {
+  const contact = findContact(req.params.nama);
+
+  if (!contact) {
+    res.status(404);
+    res.send('<h1>404</h1>');
+  } else {
+    deleteContact(req.params.nama);
+    // Kirimkan Flash Message
+    req.flash('msg', 'Data berhasil ditambahkan!');
+    res.redirect('/contact');
+  }
+});
+
+app.get('/contact/:nama', (req, res) => {
+  const contact = findContact(req.params.nama);
+  res.render('detail', {
+    contact,
+    layout: 'layouts/main-layout.ejs',
+    header: 'ExpressJS - Contact Page',
+  });
 });
